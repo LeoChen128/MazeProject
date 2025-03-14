@@ -7,9 +7,14 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         Maze maze = new Maze(getMaze("src/maze"));
-//        for(String[] array : maze){
-//            System.out.println(Arrays.toString(array));
-//        }
+        ArrayList<String> path = maze.solve();
+
+        for (int i = 0; i < path.size(); i++) {
+            System.out.print(path.get(i));
+            if (i < path.size() - 1) {
+                System.out.print(" , ");
+            }
+        }
     }
     public static String[][] getMaze(String fileName) {
         File f = new File(fileName);
@@ -25,7 +30,7 @@ public class Main {
 
         ArrayList<String> fileData = new ArrayList<String>();
         while (s.hasNextLine())
-            fileData.add(s.nextLine());
+            fileData.add(s.nextLine());    
 
         int rows = fileData.size();
         int cols = fileData.get(0).length();
