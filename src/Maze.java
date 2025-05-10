@@ -1,103 +1,81 @@
 import java.util.ArrayList;
 
 public class Maze {
-    private int currentX;
-    private int currentY;
     private String[][] maze;
-    private boolean[][] visited;
-    private int rows;
-    private int cols;
+    private ArrayList<Coordinate> steps;
+    private Coordinate end;
 
     public Maze(String[][] maze) {
         this.maze = maze;
-        this.rows = maze.length;
-        this.cols = maze[0].length;
-        this.visited = new boolean[rows][cols];
-        this.currentX = 0;
-        this.currentY = 0;
-    }
-    
-    public int getY() {
-        return currentY;
-    }
-    
-    public int getX() {
-        return currentX;
-    }
-    
-    public String getCoords() {
-        return "(" + getX() + ", " + getY() + ")";
+        this.steps = new ArrayList<>();
+        int lastRow = maze.length - 1;
+        int lastCol = maze[0].length - 1;
+        this.end = new Coordinate(lastRow, lastCol);
     }
 
-    public ArrayList<String> solve() {
-        ArrayList<String> solution = new ArrayList<>();
-        visited[0][0] = true;
-        currentX = 0;
-        currentY = 0;
-        solution.add(getCoords());
-        findPath(0, 0, solution);
-        return solution;
-    }
-
-    public boolean findPath(int x, int y, ArrayList<String> path) {
-        // Check if at end
-        if (x == cols - 1 && y == rows - 1) {
-            return true;
-        }
-
-        int[][] directions = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-        
-        for (int[] dir : directions) {
-            int newX = x + dir[0];
-            int newY = y + dir[1];
-
-             if (isValidMove(newX, newY)) {
-                visited[newY][newX] = true;
-                currentX = newX;
-                currentY = newY;
-                path.add(getCoords());
-                if (findPath(newX, newY, path)) {
-                    return true;
-                }
-                 //goes back
-                path.remove(path.size() - 1);
-                currentX = x;
-                currentY = y;
-            }
-        }
-        return false;
-    }
-
-    public boolean isValidMove(int x, int y) {
-    //checks if the person is inside the maze bounds
-        if (x < 0 || x >= cols || y < 0 || y >= rows) {
+    private boolean canMove(int r, int c) {
+        if (r < 0 || r >= maze.length || c < 0 || c >= maze[0].length) {
             return false;
         }
-    //checksif it's a path and person has not went there
-        return maze[y][x].equals(".") && !visited[y][x];
+        return maze[r][c].equals(".");
     }
-    
-    public void goRight() {
-        if (isValidMove(currentX + 1, currentY)) {
-            currentX++;
-        }
+
+    private boolean atEnd(Coordinate p) {
+        return p.getRow() == end.getRow() && p.getColumn() == end.getColumn();
     }
-    
-    public void goLeft() {
-        if (isValidMove(currentX - 1, currentY)) {
-            currentX--;
+
+    public String solveMaze() {
+        Coordinate current = new Coordinate(0, 0);
+        steps.add(current);
+        maze[0][0] = "#";
+
+        while (!atEnd(current)) {
+            boolean moved = false;
+            int r = current.getRow();
+            int c = current.getColumn();
+
+            //left
+            if (!moved && canMove(r, c - 1)) {
+                current = new Coordinate(r, c - 1);
+                steps.add(current);
+                maze[r][c - 1] = "#";
+                moved = true;
+            }
+            //right
+            if (!moved && canMove(r, c + 1)) {
+                current = new Coordinate(r, c + 1);
+                steps.add(current);
+                maze[r][c + 1] = "#";
+                moved = true;
+            }
+            //up
+            if (!moved && canMove(r - 1, c)) {
+                current = new Coordinate(r - 1, c);
+                steps.add(current);
+                maze[r - 1][c] = "#";
+                moved = true;
+            }
+            //down
+            if (!moved && canMove(r + 1, c)) {
+                current = new Coordinate(r + 1, c);
+                steps.add(current);
+                maze[r + 1][c] = "#";
+                moved = true;
+            }
+
+            if (!moved) {
+                steps.remove(steps.size() - 1);
+                current = steps.get(steps.size() - 1);
+            }
         }
-    }
-    
-    public void goUp() {
-        if (isValidMove(currentX, currentY - 1)) {
-            currentY--;
+
+        String output = "";
+        for (int i = 0; i < steps.size(); i++) {
+            output += steps.get(i).toString();
+            if (i < steps.size() - 1) {
+                output += " ---> ";
+            }
         }
-    }
-    
-    public void goDown() {
-        if (isValidMove(currentX, currentY + 1)) {
-            currentY++;
-        }
+        return output;
     }
 }
